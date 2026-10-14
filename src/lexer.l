@@ -33,56 +33,84 @@ int guardarIden(char* token){
     return numIden-1;
 }
 
-//esta funcion creo que se puede borrar:
-int guardarCte(char* token){
-    
-    //Obtenemos los valores de char a int tratando los () de los valores con signo
-    int valorCte;
-    if(token[0] == '(' ){
-        valorCte = atoi(&token[1]); //lee los digitos y finaliza all llegar a )
-    }
-    else{
-        valorCte = atoi(token);
-    }
-
-    //busqueda
-    for(int i=0; i<numCtes; i++){
-        if(tablaCtes[i] == valorCte){
-            return i;
-        }
-    }
-
-    //insertar
-    tablaCtes[numCtes] = valorCte;
-    numCtes++;
-    return numCtes - 1;
-}
-
 %}
 
 //Expresiones regulares <>
 
-//clase 3 contantes numericas base 10 con o sin signo
+
+//Clase 0: operadores aritmeticos
+op_arit     (\+|-|/|\*|%)
+
+//Clase 1: operadores logicos 
+op_log      (&&|\|\||!)
+
+//Clase 2: operadores relacionales
+op_rel      (==|!=|>=|<=|>|<)
+
+//Clase 3 contantes numericas base 10 con o sin signo
 digito [0-9]
 dig_signo \([+-]{digito}+\)
 ctes_numerica {digito}+|{dig_signo}
 
-//clase 4 palabras reservadas
+//Clase 4 palabras reservadas
 pal_res (assinado|caso|enquanto|fazer|flutuador|inteiro|para|quebrar|retorno|se|trocar)
 
-//clase 5 Identificadores
+//Clase 5 Identificadores
 letra [a-zA-Z]
 identificador _{letra}({letra}|{digito}|_)*
 
-//clase 6 simbolos especiales
+//Clase 6 simbolos especiales
 simb_esp (\(|\)|\{|\}|;|,|\[|\]|:|#)
 
 
 
 %%
 
-//acciones y expresiones finales
-//clase 3
+//Clase 0: operadores aritmeticos 
+{op_arit} {
+    printf("<0, %d>\n", yytext[0]);
+}
+
+/* Clase 1: operadores logicos */
+"&&" {
+    printf("<1, 0>\n");
+}
+
+"||" {
+    printf("<1, 1>\n");
+}
+
+"!" {
+    printf("<1, 2>\n");
+}
+
+//Clase 2: operadores relacionales 
+"==" {
+    printf("<2, 0>\n");
+}
+
+"!=" {
+    printf("<2, 1>\n");
+}
+
+">" {
+    printf("<2, 2>\n");
+}
+
+"<" {
+    printf("<2, 3>\n");
+}
+
+">=" {
+    printf("<2, 4>\n");
+}
+
+"<=" {
+    printf("<2, 5>\n");
+}
+
+
+//Clase 3
 {ctes_numerica} {
     
     int valorCte;
@@ -98,7 +126,7 @@ simb_esp (\(|\)|\{|\}|;|,|\[|\]|:|#)
 
 }
 
-//clase 4
+//Clase 4
 
 {pal_res} {
     int valor;
@@ -118,7 +146,7 @@ simb_esp (\(|\)|\{|\}|;|,|\[|\]|:|#)
 }
 
 
-//clase 5
+//Clase 5
 {identificador} {
     
     int indice = guardarIden(yytext);
@@ -126,9 +154,15 @@ simb_esp (\(|\)|\{|\}|;|,|\[|\]|:|#)
 
 }
 
-//clase 6
+//Clase 6
 {simb_esp} {printf("<6, %d>\n", yytext[0]);}
 
+
+//Ignorar espacios, tabuladores y saltos de linea 
+[ \t\r\n]+ {
+}
+
+//Cualquier otro caracter
 . {
 
     printf("Error Léxico Encontrado: %s\n", yytext);
