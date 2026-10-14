@@ -35,6 +35,8 @@ int guardarIden(char* token){
 
 %}
 
+%option noyywrap
+
 //Expresiones regulares <>
 
 
