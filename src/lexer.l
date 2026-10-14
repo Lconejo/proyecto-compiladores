@@ -4,23 +4,36 @@
 #include <string.h>
 #include <stdlib.h>
 
-char tablaIden [150][50];
-int numIden = 0, numCtes = 0;
-int tablaCtes [150];
+//Tabla de simbolos:
+
+typedef struct{
+    int posicion;
+    char nombre[50];
+    int tipo;
+} Simbolo; 
+
+Simbolo tablaIden[150];
+int numIden = 0;
 
 
 int guardarIden(char* token){
     //busqueda para no guardarlo 2 veces
     for(int i=0; i<numIden; i++){
-        if(strcmp(tablaIden[i], token) == 0){
-            return i; //indice en la tabla
+        if(strcmp(tablaIden[i].nombre, token) == 0){
+            return tablaIden[i].posicion; //indice en la tabla
         }
     }
-    strcpy(tablaIden[numIden], token); //guardamos el token en la tabla
+
+    //insertamos en la posicion, el nombre y su tipo
+
+    tablaIden[numIden].posicion = numIden;
+    strcpy(tablaIden[numIden].nombre, token); //guardamos el token en la tabla
+    tablaIden[numIden].tipo = -1; //valor inicial 
     numIden++;
     return numIden-1;
 }
 
+//esta funcion creo que se puede borrar:
 int guardarCte(char* token){
     
     //Obtenemos los valores de char a int tratando los () de los valores con signo
@@ -72,8 +85,16 @@ simb_esp (\(|\)|\{|\}|;|,|\[|\]|:|#)
 //clase 3
 {ctes_numerica} {
     
-    int indice = guardarCte(yytext);
-    printf("Constante Numerica Valida: %s, Valor: %d\n", yytext, indice);
+    int valorCte;
+
+    if(yytext[0] == '(' ){
+        valorCte = atoi(&yytext[1]); //atoi es ascii to integer
+    }
+    else{
+        valorCte = atoi(yytext);
+    }
+
+    printf("<3, %d>\n", valorCte); //token clase, valor
 
 }
 
@@ -92,24 +113,25 @@ simb_esp (\(|\)|\{|\}|;|,|\[|\]|:|#)
     else if (strcmp(yytext, "retorno") == 0) valor = 8;
     else if (strcmp(yytext, "se") == 0) valor = 9;
     else if (strcmp(yytext, "trocar") == 0) valor = 10;
-    printf("Palabra Reservada Valida: %s, Valor: %d\n", yytext, valor);
 
-    //**NO REQUIERE TABLA**
-    }
+    printf("<4, %d>\n", valor);
+}
 
 
 //clase 5
 {identificador} {
     
     int indice = guardarIden(yytext);
-    printf("Identificador Valido: %s, Valor: %d\n", yytext, indice);
+    printf("<5, %d>\n", indice);
 
 }
 
 //clase 6
-{simb_esp} {printf("Simbolo Especial Valido: %s\n", yytext);
+{simb_esp} {printf("<6, %d>\n", yytext[0]);}
 
-//**NO REQUIERE TABLA**
+. {
+
+    printf("Error Léxico Encontrado: %s\n", yytext);
 
 }
 
@@ -117,3 +139,32 @@ simb_esp (\(|\)|\{|\}|;|,|\[|\]|:|#)
 %%
 
 //codigo C main
+
+//codigo C main
+int main(int argc, char *argv[]) {
+    // Verificar si se pasó el archivo fuente en la línea de comandos
+    if (argc < 2) {
+        printf("Falta el archivo de entrada.\n");
+        return 1;
+    }
+
+    // Apuntar Flex al archivo de prueba
+    yyin = fopen(argv[1], "r");
+    if (!yyin) {
+        printf("Error al abrir el archivo.\n");
+        return 1;
+    }
+
+    // Iniciar el análisis léxico
+    yylex();
+
+    fclose(yyin);
+
+    // Opcional: Imprimir tu tabla de símbolos al final para validar
+    printf("\n--- Tabla de Simbolos (Identificadores) ---\n");
+    for(int i = 0; i < numIden; i++) {
+        printf("Pos: %d | Nombre: %s | Tipo: %d\n", tablaIden[i].posicion, tablaIden[i].nombre, tablaIden[i].tipo);
+    }
+    
+    return 0;
+}
