@@ -1,3 +1,13 @@
+/*
+    Elaborado por:
+    Ambrosio Escobar Dominic Yael
+    Briones Gómez Oliver Cesar Augusto
+    Ramírez Rodríguez Oscar Gael
+
+    Fecha de elaboración: 13/Octubre/2026
+*/
+
+
 /*bibliotecas a usar, variables globales y expresiones regulares <>*/
 %{
 #include <stdio.h>
@@ -15,6 +25,7 @@ typedef struct{
 Simbolo tablaIden[150];
 int numIden = 0;
 
+    /*Función guardarIden: Guarda el token en la tabla de símbolos*/
 
 int guardarIden(char* token){
     /*busqueda para no guardarlo 2 veces*/
